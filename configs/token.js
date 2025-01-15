@@ -1,20 +1,10 @@
-import { config } from 'dotenv'
+import { config } from 'dotenv';
 
-config()
+config();
 
-export default {
-    token: {
-        access: {
-            secret: process.env.JWT_ACCESS_SECRET,
-            exprisIn: process.env.JWT_ACCESS_EXPIRES_IN,
-        },
-        refresh: {
-            secret: process.env.JWT_REFRESH_SECRET,
-            exprisIn: process.env.JWT_REFRESH_EXPIRES_IN,
-        },
-        forget: {
-            secret: process.env.JWT_FORGET_PASSWORD_SECRET,
-            exprisIn: process.env.JWT_FORGET_PASSWORD_EXPIRES_IN,
-        },
-    },
-}
+export const token = {
+    jwt: {
+        secret: process.env.JWT_SECRET || 'your-secret-key',
+        expiresIn: '24h'
+    }
+};

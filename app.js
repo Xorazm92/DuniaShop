@@ -11,6 +11,8 @@ import { fileURLToPath } from 'url';
 import { routers } from './routers/index.js';
 import { logger } from './utils/logger.js';
 import { swaggerSpec } from './configs/swagger.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { apiVersion } from './middlewares/apiVersion.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -94,7 +96,7 @@ app.get('/register', (req, res) => {
 });
 
 // API yo'llari
-app.use('/api/v1', routers);
+app.use('/api/v1', apiVersion('1.0'), routers);
 
 // 404 xatolik sahifasi
 app.use((req, res) => {
@@ -103,6 +105,9 @@ app.use((req, res) => {
         page: '404'
     });
 });
+
+// Error handling middleware
+app.use(errorHandler);
 
 // Xatoliklarni qayta ishlash
 app.use((err, req, res, next) => {
