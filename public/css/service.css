@@ -1,0 +1,132 @@
+/* Xizmatlar bo'limi */
+.services_section {
+    padding: 80px 0;
+    background-color: #f9f9f9;
+}
+
+.services_title {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.services_desc {
+    text-align: center;
+    color: #666;
+    margin-bottom: 50px;
+}
+
+.services_cards {
+    margin-bottom: 60px;
+}
+
+.service_card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-bottom: 30px;
+}
+
+.service_card:hover {
+    transform: translateY(-10px);
+}
+
+.service_icon {
+    font-size: 40px;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+.service_card h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.service_card p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.service_btn {
+    display: inline-block;
+    padding: 10px 25px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.service_btn:hover {
+    background-color: #0056b3;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Narxlar bo'limi */
+.pricing_section {
+    padding-top: 60px;
+}
+
+.pricing_section h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #333;
+}
+
+.price_card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-bottom: 30px;
+}
+
+.price_card.featured {
+    transform: scale(1.05);
+    border: 2px solid #007bff;
+}
+
+.price_card:hover {
+    transform: translateY(-10px);
+}
+
+.price_card h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.price_card .price {
+    font-size: 36px;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+.price_card .price span {
+    font-size: 16px;
+    color: #666;
+}
+
+.price_card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.price_card ul li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    color: #666;
+}
+
+.price_card ul li:last-child {
+    border-bottom: none;
+}
