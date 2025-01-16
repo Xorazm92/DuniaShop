@@ -8,11 +8,33 @@ export default {
   development: {
     client: 'pg',
     connection: {
-      host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || 5432,
-      database: process.env.DB_NAME || 'raya_dunia',
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres'
+      host: process.env.PG_HOST || 'localhost',
+      port: process.env.PG_PORT || 5432,
+      database: process.env.PG_DATABASE || 'raya_dunia',
+      user: process.env.PG_USER || 'postgres',
+      password: process.env.PG_PASSWORD || 'postgres'
+    },
+    migrations: {
+      directory: './migrations',
+      tableName: 'knex_migrations'
+    },
+    seeds: {
+      directory: './seeds'
+    }
+  },
+
+  staging: {
+    client: 'pg',
+    connection: {
+      host: process.env.PG_HOST,
+      port: process.env.PG_PORT,
+      database: process.env.PG_DATABASE,
+      user: process.env.PG_USER,
+      password: process.env.PG_PASSWORD
+    },
+    pool: {
+      min: 2,
+      max: 10
     },
     migrations: {
       directory: './migrations',
@@ -20,39 +42,22 @@ export default {
     }
   },
 
-  staging: {
-    client: 'pg',
-    connection: {
-      host: 'staging-host',
-      database: 'staging_database',
-      user: 'staging_user',
-      password: 'staging_password',
-    },
-    pool: {
-      min: 2,
-      max: 10,
-    },
-    migrations: {
-      tableName: 'knex_migrations',
-      directory: './migrations',
-    },
-  },
-
   production: {
     client: 'pg',
     connection: {
-      host: 'production-host',
-      database: 'production_database',
-      user: 'production_user',
-      password: 'production_password',
+      host: process.env.PG_HOST,
+      port: process.env.PG_PORT,
+      database: process.env.PG_DATABASE,
+      user: process.env.PG_USER,
+      password: process.env.PG_PASSWORD
     },
     pool: {
       min: 2,
-      max: 10,
+      max: 10
     },
     migrations: {
-      tableName: 'knex_migrations',
       directory: './migrations',
-    },
-  },
-}
+      tableName: 'knex_migrations'
+    }
+  }
+};
