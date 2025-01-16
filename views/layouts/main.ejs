@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title : 'Raya Dunia' %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <%- typeof customCss !== 'undefined' ? `<link rel="stylesheet" href="/css/${customCss}.css">` : '' %>
+    <%- extractStyles %>
+</head>
+<body>
+    <%- body %>
+    
+    <script src="/js/main.js"></script>
+    <%- typeof customJs !== 'undefined' ? `<script src="/js/${customJs}.js"></script>` : '' %>
+    <%- extractScripts %>
+</body>
+</html>

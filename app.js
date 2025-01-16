@@ -3,21 +3,41 @@ import morgan from 'morgan';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import swaggerUi from 'swagger-ui-express';
 import expressEjsLayouts from 'express-ejs-layouts';
+import session from 'express-session';
+import flash from 'connect-flash';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { routers } from './routers/index.js';
 import { logger } from './utils/logger.js';
-import { swaggerSpec } from './configs/swagger.js';
 import { errorHandler } from './middlewares/errorHandler.js';
-import { apiVersion } from './middlewares/apiVersion.js';
+import { config } from './configs/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Session va Flash message sozlamalari
+app.use(session({
+    secret: process.env.JWT_ACCESS_SECRET || '12345',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 soat
+    }
+}));
+app.use(flash());
+
+// Global middleware for flash messages and user
+app.use((req, res, next) => {
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    res.locals.user = req.session.user || null;
+    next();
+});
 
 // Rate limiter sozlamalari
 const limiter = rateLimit({
@@ -36,98 +56,26 @@ app.set('layout extractStyles', true);
 
 // Static fayllar uchun
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
+app.use('/js', express.static(path.join(__dirname, 'public/js')));
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
-// Middleware'lar
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(limiter);
-app.use(morgan('dev'));
+app.use(cors());
 app.use(helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: false
 }));
-app.use(cors());
+app.use(morgan('dev'));
+app.use(limiter);
 
-// Swagger hujjatlari
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Routes
+app.use('/', routers);
 
-// Asosiy sahifalar yo'llari
-app.get('/', (req, res) => {
-    res.render('index', { 
-        title: 'Bosh sahifa',
-        page: 'home'
-    });
-});
-
-app.get('/about', (req, res) => {
-    res.render('about', { 
-        title: 'Biz haqimizda',
-        page: 'about'
-    });
-});
-
-app.get('/products', (req, res) => {
-    res.render('products', { 
-        title: 'Mahsulotlar',
-        page: 'products'
-    });
-});
-
-app.get('/contact', (req, res) => {
-    res.render('contact', { 
-        title: 'Aloqa',
-        page: 'contact'
-    });
-});
-
-app.get('/login', (req, res) => {
-    res.render('login', { 
-        title: 'Kirish',
-        page: 'login'
-    });
-});
-
-app.get('/register', (req, res) => {
-    res.render('register', { 
-        title: 'Ro\'yxatdan o\'tish',
-        page: 'register'
-    });
-});
-
-// API yo'llari
-app.use('/api/v1', apiVersion('1.0'), routers);
-
-// 404 xatolik sahifasi
-app.use((req, res) => {
-    res.status(404).render('404', { 
-        title: 'Sahifa topilmadi',
-        page: '404'
-    });
-});
-
-// Error handling middleware
+// Error handler
 app.use(errorHandler);
-
-// Xatoliklarni qayta ishlash
-app.use((err, req, res, next) => {
-    logger.error(err.message);
-    res.status(err.status || 500).render('error', {
-        title: 'Xatolik yuz berdi',
-        page: 'error',
-        error: process.env.NODE_ENV === 'development' ? err : {}
-    });
-});
-
-// Kutilmagan xatoliklarni qayta ishlash
-process.on('uncaughtException', (err) => {
-    logger.error('Kutilmagan xatolik: ' + err.message);
-    process.exit(1);
-});
-
-process.on('unhandledRejection', (err) => {
-    logger.error('Qayta ishlanmagan va\'da xatoligi: ' + err.message);
-    process.exit(1);
-});
 
 export default app;

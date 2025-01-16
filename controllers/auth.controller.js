@@ -6,36 +6,52 @@ export class AuthController {
         this.authService = new AuthService();
     }
 
-    register = async (req, res) => {
+    async register(userData) {
         try {
-            const userData = req.body;
             const { user, token } = await this.authService.register(userData);
-            res.status(201).json({ user, token });
+            return {
+                success: true,
+                user,
+                token
+            };
         } catch (error) {
             logger.error('Registration error:', error);
-            res.status(400).json({ message: 'Ro\'yxatdan o\'tishda xatolik yuz berdi' });
+            return {
+                success: false,
+                message: error.message || 'Ro\'yxatdan o\'tishda xatolik yuz berdi'
+            };
         }
     }
 
-    login = async (req, res) => {
+    async login(credentials) {
         try {
-            const { email, password } = req.body;
-            const { user, token } = await this.authService.login(email, password);
-            res.json({ user, token });
+            const { user, token } = await this.authService.login(credentials);
+            return {
+                success: true,
+                user,
+                token
+            };
         } catch (error) {
             logger.error('Login error:', error);
-            res.status(401).json({ message: 'Noto\'g\'ri email yoki parol' });
+            return {
+                success: false,
+                message: error.message || 'Noto\'g\'ri email yoki parol'
+            };
         }
     }
 
-    logout = async (req, res) => {
+    async logout(token) {
         try {
-            const token = req.headers.authorization?.split(' ')[1];
             await this.authService.logout(token);
-            res.status(204).send();
+            return {
+                success: true
+            };
         } catch (error) {
             logger.error('Logout error:', error);
-            res.status(500).json({ message: 'Tizimdan chiqishda xatolik yuz berdi' });
+            return {
+                success: false,
+                message: error.message || 'Tizimdan chiqishda xatolik yuz berdi'
+            };
         }
     }
 
@@ -54,10 +70,12 @@ export class AuthController {
         try {
             const { email } = req.body;
             await this.authService.forgotPassword(email);
-            res.json({ message: 'Parolni tiklash uchun ko\'rsatmalar emailingizga yuborildi' });
+            req.flash('success', 'Parolni tiklash uchun ko\'rsatmalar emailingizga yuborildi');
+            res.redirect('/auth/login');
         } catch (error) {
             logger.error('Forgot password error:', error);
-            res.status(400).json({ message: 'Parolni tiklashda xatolik yuz berdi' });
+            req.flash('error', error.message || 'Parolni tiklashda xatolik yuz berdi');
+            res.redirect('/auth/forgot-password');
         }
     }
 
@@ -65,21 +83,26 @@ export class AuthController {
         try {
             const { token, password } = req.body;
             await this.authService.resetPassword(token, password);
-            res.json({ message: 'Parol muvaffaqiyatli o\'zgartirildi' });
+            req.flash('success', 'Parolingiz muvaffaqiyatli yangilandi');
+            res.redirect('/auth/login');
         } catch (error) {
             logger.error('Reset password error:', error);
-            res.status(400).json({ message: 'Parolni o\'zgartirishda xatolik yuz berdi' });
+            req.flash('error', error.message || 'Parolni yangilashda xatolik yuz berdi');
+            res.redirect('/auth/reset-password');
         }
     }
 
     getProfile = async (req, res) => {
         try {
-            const userId = req.user.id;
-            const profile = await this.authService.getProfile(userId);
-            res.json(profile);
+            const user = req.session.user;
+            if (!user) {
+                return res.redirect('/auth/login');
+            }
+            res.render('profile', { user });
         } catch (error) {
             logger.error('Get profile error:', error);
-            res.status(500).json({ message: 'Profil ma\'lumotlarini olishda xatolik yuz berdi' });
+            req.flash('error', 'Profil ma\'lumotlarini olishda xatolik');
+            res.redirect('/');
         }
     }
 

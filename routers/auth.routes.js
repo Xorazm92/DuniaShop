@@ -1,38 +1,73 @@
-import { Router } from 'express'
-import { authGuard, checkValidatons, roleGuard } from '../middlewares/index.js'
-import { userSchema } from '../validations/index.js'
-import {
-    createdAdminController,
-    deleteAdminController,
-    forgetPasswordController,
-    loginController,
-    otpContrloller,
-    registerContrloller,
-    resetPasswordController,
-} from '../controllers/index.js'
-import { config } from '../configs/index.js'
+import { Router } from 'express';
+import { AuthController } from '../controllers/auth.controller.js';
 
-export const authRouter = new Router()
+const authController = new AuthController();
+export const authRouter = Router();
 
-authRouter.post('/register', checkValidatons(userSchema), registerContrloller)
-authRouter.post('/verifyOtp', otpContrloller)
-authRouter.post('/login', loginController)
-//forget password
-authRouter.post('/forgot-password', forgetPasswordController)
-authRouter.post('/reset-password', resetPasswordController)
+// Views
+authRouter.get('/', (req, res) => {
+    res.render('index', {
+        title: 'Bosh sahifa',
+        user: req.session.user
+    });
+});
 
-//admin create
-const secret = config.token.access.secret
-authRouter.post(
-    '/create-admin',
-    authGuard(secret),
-    roleGuard(['admin', 'superAdmin']),
-    checkValidatons(userSchema),
-    createdAdminController,
-)
-authRouter.delete(
-    '/delete-admin/:id',
-    authGuard(secret),
-    roleGuard(['admin', 'superAdmin']),
-    deleteAdminController,
-)
+authRouter.get('/auth/login', (req, res) => {
+    if (req.session.user) {
+        return res.redirect('/');
+    }
+    res.render('login', {
+        title: 'Kirish',
+        error: req.flash('error'),
+        success: req.flash('success')
+    });
+});
+
+// Auth endpoints
+authRouter.post('/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const result = await authController.login({ email, password });
+        
+        if (result.success) {
+            req.session.user = result.user;
+            req.session.token = result.token;
+            req.flash('success', 'Muvaffaqiyatli kirdingiz');
+            res.redirect('/');
+        } else {
+            req.flash('error', result.message || 'Login xatosi');
+            res.redirect('/auth/login');
+        }
+    } catch (error) {
+        req.flash('error', error.message);
+        res.redirect('/auth/login');
+    }
+});
+
+authRouter.post('/auth/register', async (req, res) => {
+    try {
+        const result = await authController.register(req.body);
+        
+        if (result.success) {
+            req.session.user = result.user;
+            req.session.token = result.token;
+            req.flash('success', 'Muvaffaqiyatli ro\'yxatdan o\'tdingiz');
+            res.redirect('/');
+        } else {
+            req.flash('error', result.message || 'Ro\'yxatdan o\'tishda xatolik');
+            res.redirect('/auth/login');
+        }
+    } catch (error) {
+        req.flash('error', error.message);
+        res.redirect('/auth/login');
+    }
+});
+
+authRouter.get('/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Session destroy error:', err);
+        }
+        res.redirect('/auth/login');
+    });
+});

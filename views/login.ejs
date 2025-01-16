@@ -1,12 +1,23 @@
 <%- include('partials/header', {
     title: 'Raya Dunia - Kirish',
     active: 'login',
-    customCss: 'login',
-    customJs: 'api'
+    customCss: 'login'
 }) %>
 
 <div class="account-page">
     <div class="container">
+        <% if (error && error.length > 0) { %>
+            <div class="alert alert-danger">
+                <%= error %>
+            </div>
+        <% } %>
+        
+        <% if (success && success.length > 0) { %>
+            <div class="alert alert-success">
+                <%= success %>
+            </div>
+        <% } %>
+
         <div class="row">
             <div class="col-2">
                 <img src="/images/logo3.png" width="100%">
@@ -15,21 +26,22 @@
             <div class="col-2">
                 <div class="form-container">
                     <div class="form-btn">
-                        <span onclick="login()">Kirish</span>
-                        <span onclick="register()">Ro'yxatdan o'tish</span>
+                        <span onclick="showLoginForm()">Kirish</span>
+                        <span onclick="showRegisterForm()">Ro'yxatdan o'tish</span>
                         <hr id="Indicator">
                     </div>
 
-                    <form id="LoginForm" onsubmit="handleLogin(event)">
-                        <input type="email" placeholder="Email" id="loginEmail">
-                        <input type="password" placeholder="Parol" id="loginPassword">
+                    <form id="LoginForm" action="/auth/login" method="POST">
+                        <input type="email" name="email" placeholder="Email" required>
+                        <input type="password" name="password" placeholder="Parol" required>
                         <button type="submit" class="btn">Kirish</button>
+                        <a href="/auth/forgot-password">Parolni unutdingizmi?</a>
                     </form>
 
-                    <form id="RegForm" onsubmit="handleRegister(event)">
-                        <input type="text" placeholder="Foydalanuvchi nomi" id="regUsername">
-                        <input type="email" placeholder="Email" id="regEmail">
-                        <input type="password" placeholder="Parol" id="regPassword">
+                    <form id="RegForm" action="/auth/register" method="POST">
+                        <input type="text" name="username" placeholder="Foydalanuvchi nomi" required>
+                        <input type="email" name="email" placeholder="Email" required>
+                        <input type="password" name="password" placeholder="Parol" required>
                         <button type="submit" class="btn">Ro'yxatdan o'tish</button>
                     </form>
                 </div>
@@ -38,4 +50,34 @@
     </div>
 </div>
 
-<%- include('partials/footer', { customJs: 'api' }) %>
+<script>
+function showLoginForm() {
+    const loginForm = document.getElementById("LoginForm");
+    const regForm = document.getElementById("RegForm");
+    const indicator = document.getElementById("Indicator");
+    
+    loginForm.style.transform = "translateX(0px)";
+    regForm.style.transform = "translateX(0px)";
+    indicator.style.transform = "translateX(0px)";
+}
+
+function showRegisterForm() {
+    const loginForm = document.getElementById("LoginForm");
+    const regForm = document.getElementById("RegForm");
+    const indicator = document.getElementById("Indicator");
+    
+    loginForm.style.transform = "translateX(-300px)";
+    regForm.style.transform = "translateX(-300px)";
+    indicator.style.transform = "translateX(100px)";
+}
+
+// Xatolik yoki muvaffaqiyat xabari bo'lsa, 3 soniyadan keyin yo'qoladi
+setTimeout(() => {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        alert.style.display = 'none';
+    });
+}, 3000);
+</script>
+
+<%- include('partials/footer') %>
